@@ -16,12 +16,15 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class CategoryResource extends Resource
 {
     protected static ?string $model = Category::class;
+    protected static ?string $navigationIcon = 'heroicon-o-tag';
+
+    // protected static ?string $navigationIcon = 'heroicon-o-collection';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('name')
+                Forms\Components\TextInput::make('category_name')
                     ->required(),
             ]);
     }
@@ -30,12 +33,18 @@ class CategoryResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('category_name'),
+                Tables\Columns\TextColumn::make('category_name')->label('FG Module'),
             ])
             ->actions([
-                Tables\Actions\Action::make('manageSubcategories')
-                    ->label('Manage Subcategories')
-                    ->url(fn (Category $record) => route('filament.admin.resources.subcategories.index', ['category_id' => $record])),
+                Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\Action::make('view_subcategories')
+                    ->url(fn (Category $record): string => route('filament.admin.resources.subcategories.index', ['main_category_id' => $record->id]))
+                    // ->icon('heroicon-s-eye')
+                    ->label('View Subcategories'),
+            ])
+            ->bulkActions([
+                Tables\Actions\DeleteBulkAction::make(),
             ]);
     }
 
@@ -43,8 +52,15 @@ class CategoryResource extends Resource
     {
         return [
             'index' => Pages\ListCategories::route('/'),
-            'create' => Pages\CreateCategory::route('/create'),
-            'edit' => Pages\EditCategory::route('/{record}/edit'),
+            // 'create' => Pages\CreateCategory::route('/create'),
+            // 'edit' => Pages\EditCategory::route('/{record}/edit'),
+        ];
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            //
         ];
     }
 }

@@ -13,6 +13,6 @@ class SubcategoryData extends Model
 
     public function subCategory(): BelongsTo
     {
-        return $this->belongsTo(SubCategory::class);
+        return $this->belongsTo(SubCategory::class, 'subcategory_id');
     }
 }

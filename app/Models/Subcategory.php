@@ -10,10 +10,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class SubCategory extends Model
 {
     // protected $fillable = ['name', 'main_category_id'];
+    protected $table = 'subcategories'; // Ensure this matches your actual table name
 
     public function mainCategory(): BelongsTo
     {
-        return $this->belongsTo(Category::class);
+        return $this->belongsTo(Category::class, 'category_id');
     }
 
     public function items(): HasMany

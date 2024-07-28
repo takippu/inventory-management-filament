@@ -13,12 +13,15 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Pages\Actions\Action;
 
 class SubcategoryResource extends Resource
 {
     protected static ?string $model = Subcategory::class;
 
+    protected static ?string $navigationIcon = 'heroicon-o-tag';
 
+    protected static bool $shouldRegisterNavigation = false;
 
     public static function form(Form $form): Form
     {
@@ -27,7 +30,7 @@ class SubcategoryResource extends Resource
                 Forms\Components\TextInput::make('sub_name')->label('Part Name')
                     ->required(),
                 Forms\Components\Select::make('category_id')->label('FG Module')
-                    ->relationship('category', 'category_name')
+                    ->relationship('mainCategory', 'category_name')
                     ->required(),
             ]);
     }
@@ -36,29 +39,55 @@ class SubcategoryResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('sub_name')->label('Part Name'),
-                Tables\Columns\TextColumn::make('category.category_name')->label('FG Module'),
+                Tables\Columns\TextColumn::make('sub_name')->label('Part Name')->searchable(),
+                Tables\Columns\TextColumn::make('mainCategory.category_name')->label('FG Module')->searchable(),
             ])
+            // ->filters([
+            //     Tables\Filters\SelectFilter::make('sub_category_id'),
+            //         // ->relationship('mainCategory', 'sub_name'),
+            // ])
             ->actions([
-                Tables\Actions\Action::make('manageSubcategories')
-                    ->label('View Data')
-                    ->url(fn (Subcategory $record) => route('filament.admin.resources.subcategory-datas.index', ['subcategory_id' => $record])),
+                Tables\Actions\EditAction::make()->modalHeading('Edit Item'),
+                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\Action::make('view_items')
+                    ->url(fn (SubCategory $record): string => route('filament.admin.resources.subcategory-datas.index', ['subcategory_id' => $record->id]))
+                    ->icon('heroicon-s-eye')
+                    ->label('View Items'),
+            ])
+            ->bulkActions([
+                Tables\Actions\DeleteBulkAction::make(),
             ]);
+            // ->actions([
+            //     Tables\Actions\Action::make('manageSubcategories')
+            //         ->label('View Data')
+            //         ->url(fn (Subcategory $record) => route('filament.admin.resources.subcategory-datas.index', ['subcategory_id' => $record])),
+            // ]);
     }
 
     public static function getPages(): array
     {
         return [
             'index' => Pages\ListSubcategories::route('/'),
-            'create' => Pages\CreateSubcategory::route('/create'),
-            'edit' => Pages\EditSubcategory::route('/{record}/edit'),
+            // 'create' => Pages\CreateSubcategory::route('/create'),
+            // 'edit' => Pages\EditSubcategory::route('/{record}/edit'),
         ];
     }
 
     public static function getRelations(): array
     {
         return [
-            SubcategoryDataRelationManager::class,
+            // SubcategoryDataRelationManager::class,
         ];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        $query = parent::getEloquentQuery();
+
+        if ($mainCategoryId = request()->get('main_category_id')) {
+            $query->where('category_id', $mainCategoryId);
+        }
+
+        return $query;
     }
 }
