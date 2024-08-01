@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\SubcategoryDataResource\RelationManagers\SubcategoryDataRelationManager;
 use App\Filament\Resources\SubcategoryResource\Pages;
 use App\Filament\Resources\SubcategoryResource\RelationManagers;
+use App\Models\Category;
 use App\Models\Subcategory;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -23,6 +24,29 @@ class SubcategoryResource extends Resource
 
     protected static bool $shouldRegisterNavigation = false;
 
+    public static function getModelLabel(): string
+    {
+        // Fetch the subcategory based on some context or identifier
+        $mainCatId = request('main_category_id'); // Example of fetching from the route
+        // dd($subcategoryId);
+        if ($mainCatId) {
+            $mainCat = Category::find($mainCatId);
+    
+            if ($mainCat) {
+                // Assuming the subcategory table has a 'label' field
+                return $mainCat->category_name;
+            }
+        }
+    
+        // Default label if no subcategory found
+        return '-';
+    }
+    
+    public static function getBreadcrumb(): string
+    {
+        return '';
+    }
+
     public static function form(Form $form): Form
     {
         return $form
@@ -40,7 +64,7 @@ class SubcategoryResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('sub_name')->label('Part Name')->searchable(),
-                Tables\Columns\TextColumn::make('mainCategory.category_name')->label('FG Module')->searchable(),
+                // Tables\Columns\TextColumn::make('mainCategory.category_name')->label('FG Module')->searchable(),
             ])
             // ->filters([
             //     Tables\Filters\SelectFilter::make('sub_category_id'),

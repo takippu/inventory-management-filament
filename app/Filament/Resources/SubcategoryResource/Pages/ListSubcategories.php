@@ -10,6 +10,10 @@ class ListSubcategories extends ListRecords
 {
     protected static string $resource = SubcategoryResource::class;
 
+    public function getBreadcrumb(): ?string
+    {
+        return null;
+    }
     protected function getHeaderActions(): array
     {
         return [

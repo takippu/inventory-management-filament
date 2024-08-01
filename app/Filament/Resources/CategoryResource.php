@@ -33,7 +33,7 @@ class CategoryResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('category_name')->label('FG Module'),
+                Tables\Columns\TextColumn::make('category_name')->label('FG Module')->searchable(),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
